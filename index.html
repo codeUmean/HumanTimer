@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人體計時器</title>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            text-align: center; 
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        /* 首頁 */
+        .mode-select { 
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2vh;
+            padding: 2vh;
+        }
+        .mode-select h1 {
+            font-size: clamp(2rem, 6vw, 4rem);
+            margin-bottom: 3vh;
+        }
+        
+        /* 按鈕通用樣式 */
+        button { 
+            padding: clamp(12px, 2vh, 20px) clamp(20px, 4vw, 40px);
+            margin: 1vh;
+            font-size: clamp(16px, 2.5vw, 20px);
+            cursor: pointer;
+            border: 2px solid #333;
+            border-radius: 8px;
+            background-color: #fff;
+            transition: all 0.2s;
+            min-width: clamp(150px, 30vw, 200px);
+        }
+        button:hover {
+            background-color: #f0f0f0;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        
+        input { 
+            padding: clamp(8px, 1.5vh, 12px);
+            font-size: clamp(14px, 2vw, 18px);
+            width: clamp(120px, 25vw, 180px);
+            margin: 1vh;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .hidden { display: none !important; }
+        
+        /* 單人模式 */
+        .single-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2vh 2vw;
+            gap: 2vh;
+        }
+        .single-page h2 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+        }
+        #single-status { 
+            font-size: clamp(2rem, 6vw, 4rem);
+            color: #666;
+            min-height: 10vh;
+            display: flex;
+            align-items: center;
+        }
+        #single-result { 
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            line-height: 1.8;
+            max-width: 90vw;
+        }
+        
+        /* 雙人模式 */
+        .double-page {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .player-area {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: clamp(15px, 3vh, 30px) clamp(10px, 2vw, 20px) clamp(10px, 2vh, 20px);
+            gap: clamp(8px, 1vh, 15px);
+        }
+        .player1-area {
+            transform: rotate(180deg);
+            background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%);
+            border-bottom: 3px solid #333;
+        }
+        .player2-area {
+            background: linear-gradient(180deg, #fff3e0 0%, #ffe0b2 100%);
+        }
+        .player-area h2 {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin-bottom: clamp(8px, 1.5vh, 15px);
+            padding: clamp(5px, 1vh, 10px);
+            z-index: 1;
+            position: relative;
+        }
+        .player-status {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: #666;
+            min-height: clamp(40px, 6vh, 60px);
+            display: flex;
+            align-items: center;
+        }
+        .player-result {
+            font-size: clamp(0.85rem, 1.8vw, 1.1rem);
+            line-height: 1.5;
+            max-width: 90vw;
+            padding: clamp(5px, 1vh, 10px);
+        }
+        
+        /* 雙人模式按鈕調整 */
+        .player-area button {
+            min-width: clamp(120px, 25vw, 160px);
+            padding: clamp(10px, 1.5vh, 15px) clamp(15px, 3vw, 30px);
+            font-size: clamp(14px, 2vw, 18px);
+        }
+        .player-area input {
+            width: clamp(100px, 22vw, 150px);
+            font-size: clamp(13px, 1.8vw, 16px);
+        }
+        
+        /* 雙人模式的回首頁按鈕 */
+        .home-btn-double {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999;
+            background-color: #fff;
+            border: 3px solid #333;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            font-weight: bold;
+            min-width: clamp(100px, 20vw, 140px);
+            padding: clamp(10px, 1.8vh, 16px) clamp(18px, 3.5vw, 35px);
+        }
+        
+        /* 結果顏色 */
+        .good { color: #4CAF50; font-weight: bold; }
+        .bad { color: #f44336; font-weight: bold; }
+        
+        /* 響應式調整 */
+        @media (max-height: 600px) {
+            .player-area {
+                padding-top: clamp(12px, 2.5vh, 25px);
+            }
+            .player-area h2 { 
+                font-size: clamp(1rem, 2.5vw, 1.3rem);
+                margin-bottom: clamp(5px, 1vh, 10px);
+            }
+            .player-area button { padding: 8px 15px; }
+            .player-status { font-size: clamp(1rem, 2.5vw, 1.5rem); min-height: 30px; }
+            .player-result { font-size: clamp(0.75rem, 1.5vw, 0.95rem); }
+            .home-btn-double { padding: 8px 15px; }
+        }
+        
+        @media (min-width: 768px) {
+            .player-area {
+                padding: clamp(20px, 4vh, 40px) clamp(15px, 3vw, 40px) clamp(15px, 3vh, 30px);
+            }
+            .player-area h2 {
+                margin-bottom: clamp(10px, 2vh, 20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 首頁：模式選擇 -->
+    <div id="home-page" class="mode-select">
+        <h1>人體計時器</h1>
+        <button onclick="selectMode('single')">單人挑戰</button>
+        <button onclick="selectMode('double')">雙人對戰</button>
+    </div>
+
+    <!-- 單人模式頁面 -->
+    <div id="single-page" class="single-page hidden">
+        <h2>單人挑戰模式</h2>
+        <div>
+            <label>目標時間（秒）</label><br>
+            <input type="number" id="single-target" placeholder="輸入秒數" min="1" step="1">
+        </div>
+        <button id="single-btn" onclick="toggleSingleTimer()">開始挑戰</button>
+        <div id="single-status"></div>
+        <div id="single-result"></div>
+        <button onclick="goHome()">回到首頁</button>
+    </div>
+
+    <!-- 雙人模式頁面 -->
+    <div id="double-page" class="double-page hidden">
+        <button class="home-btn-double" onclick="goHome()">回首頁</button>
+        
+        <!-- 玩家1區域（上方，180度旋轉） -->
+        <div class="player-area player1-area">
+            <h2><br/>玩家 1</h2>
+            <input type="number" id="p1-target" placeholder="目標秒數" min="1" step="1">
+            <button id="p1-btn" onclick="togglePlayerTimer(1)">開始</button>
+            <div id="p1-status" class="player-status"></div>
+            <div id="p1-result" class="player-result"></div>
+        </div>
+        
+        <!-- 玩家2區域（下方） -->
+        <div class="player-area player2-area">
+            <h2><br/>玩家 2</h2>
+            <input type="number" id="p2-target" placeholder="目標秒數" min="1" step="1">
+            <button id="p2-btn" onclick="togglePlayerTimer(2)">開始</button>
+            <div id="p2-status" class="player-status"></div>
+            <div id="p2-result" class="player-result"></div>
+        </div>
+    </div>
+
+    <script>
+        let mode = '';
+        
+        // 單人模式變數
+        let singleTargetTime = 0;
+        let singleStartTime = 0;
+        let singleRunning = false;
+        
+        // 雙人模式變數
+        let player1 = { target: 0, start: 0, running: false };
+        let player2 = { target: 0, start: 0, running: false };
+
+        function selectMode(selectedMode) {
+            mode = selectedMode;
+            document.getElementById('home-page').classList.add('hidden');
+            if (mode === 'single') {
+                document.getElementById('single-page').classList.remove('hidden');
+            } else {
+                document.getElementById('double-page').classList.remove('hidden');
+            }
+        }
+
+        // 單人模式計時
+        function toggleSingleTimer() {
+            const input = document.getElementById('single-target');
+            const btn = document.getElementById('single-btn');
+            const status = document.getElementById('single-status');
+            const result = document.getElementById('single-result');
+            
+            if (!singleRunning) {
+                if (!input.value || input.value <= 0) {
+                    alert('請輸入有效的目標時間');
+                    return;
+                }
+                
+                singleTargetTime = parseFloat(input.value);
+                input.disabled = true;
+                btn.textContent = '停止';
+                singleRunning = true;
+                singleStartTime = Date.now();
+                status.textContent = '計時中...';
+                result.innerHTML = '';
+                
+            } else {
+                singleRunning = false;
+                const finalTime = (Date.now() - singleStartTime) / 1000;
+                const difference = Math.abs(finalTime - singleTargetTime);
+                const accuracy = Math.max(0, (1 - difference / singleTargetTime) * 100).toFixed(1);
+                
+                status.textContent = '';
+                let resultClass = difference < 0.5 ? 'good' : 'bad';
+                result.innerHTML = `
+                    <div class="${resultClass}">
+                        目標：${singleTargetTime}秒<br>
+                        實際：${finalTime.toFixed(3)}秒<br>
+                        差距：${difference.toFixed(3)}秒<br>
+                        準確度：${accuracy}%
+                    </div>
+                `;
+                
+                btn.textContent = '再試一次';
+                input.disabled = false;
+            }
+        }
+
+        // 雙人模式計時
+        function togglePlayerTimer(playerNum) {
+            const player = playerNum === 1 ? player1 : player2;
+            const input = document.getElementById(`p${playerNum}-target`);
+            const btn = document.getElementById(`p${playerNum}-btn`);
+            const status = document.getElementById(`p${playerNum}-status`);
+            const result = document.getElementById(`p${playerNum}-result`);
+            
+            if (!player.running) {
+                if (!input.value || input.value <= 0) {
+                    alert(`玩家 ${playerNum} 請輸入有效的目標時間`);
+                    return;
+                }
+                
+                player.target = parseFloat(input.value);
+                input.disabled = true;
+                btn.textContent = '停止';
+                player.running = true;
+                player.start = Date.now();
+                status.textContent = '計時中...';
+                result.innerHTML = '';
+                
+            } else {
+                player.running = false;
+                const finalTime = (Date.now() - player.start) / 1000;
+                const difference = Math.abs(finalTime - player.target);
+                const accuracy = Math.max(0, (1 - difference / player.target) * 100).toFixed(1);
+                
+                status.textContent = '';
+                let resultClass = difference < 0.5 ? 'good' : 'bad';
+                result.innerHTML = `
+                    <div class="${resultClass}">
+                        目標：${player.target}秒<br>
+                        實際：${finalTime.toFixed(3)}秒<br>
+                        差距：${difference.toFixed(3)}秒<br>
+                        準確度：${accuracy}%
+                    </div>
+                `;
+                
+                btn.textContent = '再來';
+                input.disabled = false;
+            }
+        }
+
+        function goHome() {
+            // 重置所有狀態
+            singleRunning = false;
+            player1 = { target: 0, start: 0, running: false };
+            player2 = { target: 0, start: 0, running: false };
+            
+            // 清空所有輸入和顯示
+            ['single-target', 'p1-target', 'p2-target'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = '';
+                    el.disabled = false;
+                }
+            });
+            
+            ['single-status', 'single-result', 'p1-status', 'p1-result', 'p2-status', 'p2-result'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = '';
+            });
+            
+            ['single-btn', 'p1-btn', 'p2-btn'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = id === 'single-btn' ? '開始挑戰' : '開始';
+            });
+            
+            // 切換頁面
+            document.getElementById('home-page').classList.remove('hidden');
+            document.getElementById('single-page').classList.add('hidden');
+            document.getElementById('double-page').classList.add('hidden');
+        }
+
+        // 註冊 Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
+</body>
+</html>
