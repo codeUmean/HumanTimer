@@ -3,6 +3,7 @@
   "short_name": "計時器",
   "description": "單人挑戰與雙人對戰計時器",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2196F3",
@@ -21,6 +22,7 @@
     }
   ]
 }
+
 
 
 
