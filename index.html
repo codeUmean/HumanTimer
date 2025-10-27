@@ -132,9 +132,15 @@
             min-height: clamp(40px, 6vh, 60px);
             display: flex;
             align-items: center;
+            transition: all 0.2s;  /* 新增：平滑過渡 */
         }
         .player-status.hidden-status {
-            display: none;
+            display: none !important;
+            min-height: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden;
         }
         .player-result {
             font-size: clamp(0.85rem, 1.8vw, 1.1rem);
@@ -397,6 +403,7 @@
     </script>
 </body>
 </html>
+
 
 
 
