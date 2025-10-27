@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>人體計時器</title>
-    <link rel="manifest" href="/HumanTimer/manifest.json">
+    <link rel="manifest" href="manifest.json">
     <style>
         * { 
             margin: 0; 
@@ -381,9 +381,10 @@
 
         // 註冊 Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/HumanTimer/sw.js');
+            navigator.serviceWorker.register('sw.js');
         }
     </script>
 </body>
 </html>
+
 
