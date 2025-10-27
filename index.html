@@ -133,6 +133,9 @@
             display: flex;
             align-items: center;
         }
+        .player-status.hidden-status {
+            display: none;
+        }
         .player-result {
             font-size: clamp(0.85rem, 1.8vw, 1.1rem);
             line-height: 1.5;
@@ -326,6 +329,7 @@
                 btn.textContent = '停止';
                 player.running = true;
                 player.start = Date.now();
+                status.classList.remove('hidden-status');
                 status.textContent = '計時中...';
                 result.innerHTML = '';
                 
@@ -335,6 +339,7 @@
                 const difference = Math.abs(finalTime - player.target);
                 const accuracy = Math.max(0, (1 - difference / player.target) * 100).toFixed(1);
                 
+                status.classList.add('hidden-status');
                 status.textContent = '';
                 let resultClass = difference < 0.5 ? 'good' : 'bad';
                 result.innerHTML = `
@@ -350,7 +355,7 @@
                 input.disabled = false;
             }
         }
-
+        
         function goHome() {
             // 重置所有狀態
             singleRunning = false;
@@ -368,7 +373,10 @@
             
             ['single-status', 'single-result', 'p1-status', 'p1-result', 'p2-status', 'p2-result'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.innerHTML = '';
+                if (el) {
+                    el.innerHTML = '';
+                    el.classList.remove('hidden-status');
+                }
             });
             
             ['single-btn', 'p1-btn', 'p2-btn'].forEach(id => {
@@ -389,6 +397,7 @@
     </script>
 </body>
 </html>
+
 
 
 
