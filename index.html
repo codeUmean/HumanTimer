@@ -102,7 +102,7 @@
         .player-area {
             flex: 1;
             min-height: 0;
-            overflow-y: auto;
+            overflow-y: hidden;
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
@@ -138,6 +138,9 @@
             line-height: 1.5;
             max-width: 90vw;
             padding: clamp(5px, 1vh, 10px);
+            max-height: 15vh;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
         
         /* 雙人模式按鈕調整 */
@@ -386,5 +389,6 @@
     </script>
 </body>
 </html>
+
 
 
