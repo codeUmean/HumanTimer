@@ -2,69 +2,91 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>人體計時器</title>
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-        }
-        body { 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-            text-align: center; 
+            text-align: center;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
+            background: #f5f5f5;
         }
-        
+
         /* 首頁 */
-        .mode-select { 
+        .mode-select {
             height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 2vh;
-            padding: 2vh;
+            gap: 2.5vh;
+            padding: 4vh 4vw;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
         .mode-select h1 {
-            font-size: clamp(2rem, 6vw, 4rem);
+            font-size: clamp(2.2rem, 7vw, 4rem);
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            margin-bottom: 1vh;
+        }
+        .mode-select .subtitle {
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            opacity: 0.8;
             margin-bottom: 3vh;
         }
-        
-        /* 按鈕通用樣式 */
-        button { 
+        .mode-btn {
+            width: clamp(200px, 55vw, 280px);
+            padding: clamp(14px, 2.5vh, 22px) 0;
+            font-size: clamp(17px, 2.8vw, 21px);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            border-radius: 14px;
+            color: white;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+            margin: 0;
+            min-width: unset;
+        }
+        .mode-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 24px rgba(0,0,0,0.3); }
+        .mode-btn:active { transform: scale(0.96); }
+        .btn-single { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .btn-double { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .version-tag { font-size: 0.75rem; opacity: 0.5; margin-top: 3vh; }
+
+        /* 通用按鈕 */
+        button {
             padding: clamp(12px, 2vh, 20px) clamp(20px, 4vw, 40px);
             margin: 1vh;
             font-size: clamp(16px, 2.5vw, 20px);
             cursor: pointer;
             border: 2px solid #333;
-            border-radius: 8px;
-            background-color: #fff;
-            transition: all 0.2s;
-            min-width: clamp(150px, 30vw, 200px);
+            border-radius: 10px;
+            background: #fff;
+            transition: all 0.15s;
+            min-width: clamp(140px, 28vw, 190px);
         }
-        button:hover {
-            background-color: #f0f0f0;
-        }
-        button:active {
-            transform: scale(0.95);
-        }
-        
-        input { 
+        button:hover { background: #f0f0f0; }
+        button:active { transform: scale(0.95); }
+
+        input {
             padding: clamp(8px, 1.5vh, 12px);
-            font-size: clamp(14px, 2vw, 18px);
-            width: clamp(120px, 25vw, 180px);
+            font-size: clamp(15px, 2.2vw, 19px);
+            width: clamp(130px, 28vw, 190px);
             margin: 1vh;
             border: 2px solid #ddd;
-            border-radius: 6px;
+            border-radius: 8px;
             text-align: center;
         }
-        
+
         .hidden { display: none !important; }
-        
+
         /* 單人模式 */
         .single-page {
             height: 100vh;
@@ -74,23 +96,33 @@
             align-items: center;
             padding: 2vh 2vw;
             gap: 2vh;
+            background: linear-gradient(160deg, #f8f9fa 0%, #e9ecef 100%);
         }
         .single-page h2 {
             font-size: clamp(1.5rem, 4vw, 2.5rem);
+            color: #333;
         }
-        #single-status { 
+        #single-status {
             font-size: clamp(2rem, 6vw, 4rem);
             color: #666;
             min-height: 10vh;
             display: flex;
             align-items: center;
         }
-        #single-result { 
+        #single-result {
             font-size: clamp(1rem, 2.5vw, 1.5rem);
-            line-height: 1.8;
+            line-height: 1.9;
             max-width: 90vw;
         }
-        
+
+        /* 歷史紀錄（單人） */
+        #single-history {
+            font-size: clamp(0.78rem, 1.8vw, 1rem);
+            color: #888;
+            max-width: 85vw;
+            line-height: 1.6;
+        }
+
         /* 雙人模式 */
         .double-page {
             height: 100vh;
@@ -102,7 +134,7 @@
         .player-area {
             flex: 1;
             min-height: 0;
-            overflow-y: hidden;
+            overflow-y: auto;
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
@@ -122,9 +154,6 @@
         .player-area h2 {
             font-size: clamp(1.2rem, 3vw, 1.8rem);
             margin-bottom: clamp(8px, 1.5vh, 15px);
-            padding: clamp(5px, 1vh, 10px);
-            z-index: 1;
-            position: relative;
         }
         .player-status {
             font-size: clamp(1.2rem, 3vw, 2rem);
@@ -133,21 +162,12 @@
             display: flex;
             align-items: center;
         }
-        .player-status.hidden-status {
-            display: none !important;
-        }
         .player-result {
             font-size: clamp(0.85rem, 1.8vw, 1.1rem);
             line-height: 1.5;
-            width: 100%;
-            max-width: 100vw;
+            max-width: 90vw;
             padding: clamp(5px, 1vh, 10px);
-            max-height: 15vh;
-            overflow-y: auto;
-            overflow-x: hidden;
         }
-        
-        /* 雙人模式按鈕調整 */
         .player-area button {
             min-width: clamp(120px, 25vw, 160px);
             padding: clamp(10px, 1.5vh, 15px) clamp(15px, 3vw, 30px);
@@ -157,250 +177,248 @@
             width: clamp(100px, 22vw, 150px);
             font-size: clamp(13px, 1.8vw, 16px);
         }
-        
-        /* 雙人模式的回首頁按鈕 */
         .home-btn-double {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 999;
-            background-color: #fff;
+            background: #fff;
             border: 3px solid #333;
             box-shadow: 0 6px 12px rgba(0,0,0,0.3);
             font-weight: bold;
             min-width: clamp(100px, 20vw, 140px);
             padding: clamp(10px, 1.8vh, 16px) clamp(18px, 3.5vw, 35px);
         }
-        
-        /* 結果顏色 */
+
+        /* 結果卡片 */
+        .result-card {
+            background: white;
+            border-radius: 14px;
+            padding: 16px 24px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.1);
+            line-height: 1.9;
+        }
         .good { color: #4CAF50; font-weight: bold; }
-        .bad { color: #f44336; font-weight: bold; }
-        
-        /* 響應式調整 */
+        .bad  { color: #f44336; font-weight: bold; }
+
+        /* 最佳紀錄標籤 */
+        .best-badge {
+            display: inline-block;
+            background: gold;
+            color: #7a5900;
+            font-size: 0.75em;
+            font-weight: bold;
+            padding: 1px 7px;
+            border-radius: 20px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
         @media (max-height: 600px) {
-            .player-area {
-                padding-top: clamp(12px, 2.5vh, 25px);
-            }
-            .player-area h2 { 
-                font-size: clamp(1rem, 2.5vw, 1.3rem);
-                margin-bottom: clamp(5px, 1vh, 10px);
-            }
+            .player-area { padding-top: clamp(12px, 2.5vh, 25px); }
+            .player-area h2 { font-size: clamp(1rem, 2.5vw, 1.3rem); margin-bottom: 5px; }
             .player-area button { padding: 8px 15px; }
             .player-status { font-size: clamp(1rem, 2.5vw, 1.5rem); min-height: 30px; }
             .player-result { font-size: clamp(0.75rem, 1.5vw, 0.95rem); }
             .home-btn-double { padding: 8px 15px; }
         }
-        
+
         @media (min-width: 768px) {
-            .player-area {
-                padding: clamp(20px, 4vh, 40px) clamp(15px, 3vw, 40px) clamp(15px, 3vh, 30px);
-            }
-            .player-area h2 {
-                margin-bottom: clamp(10px, 2vh, 20px);
-            }
+            .player-area { padding: clamp(20px, 4vh, 40px) clamp(15px, 3vw, 40px) clamp(15px, 3vh, 30px); }
+            .player-area h2 { margin-bottom: clamp(10px, 2vh, 20px); }
         }
     </style>
 </head>
 <body>
-    <!-- 首頁：模式選擇 -->
-    <div id="home-page" class="mode-select">
-        <h1>人體計時器</h1>
-        <button onclick="selectMode('single')">單人挑戰</button>
-        <button onclick="selectMode('double')">雙人對戰</button>
+
+<!-- 首頁 -->
+<div id="home-page" class="mode-select">
+    <h1>⏱ 人體計時器</h1>
+    <p class="subtitle">用身體感覺時間，你有多準？</p>
+    <button class="mode-btn btn-single" onclick="selectMode('single')">🎯 單人挑戰</button>
+    <button class="mode-btn btn-double" onclick="selectMode('double')">⚔️ 雙人對戰</button>
+    <div class="version-tag">v1.1</div>
+</div>
+
+<!-- 單人模式 -->
+<div id="single-page" class="single-page hidden">
+    <h2>🎯 單人挑戰模式</h2>
+    <div>
+        <label>目標時間（秒）</label><br>
+        <input type="number" id="single-target" placeholder="輸入秒數" min="1" step="1">
     </div>
+    <button id="single-btn" onclick="toggleSingleTimer()">開始挑戰</button>
+    <div id="single-status"></div>
+    <div id="single-result"></div>
+    <div id="single-history"></div>
+    <button onclick="goHome()">回到首頁</button>
+</div>
 
-    <!-- 單人模式頁面 -->
-    <div id="single-page" class="single-page hidden">
-        <h2>單人挑戰模式</h2>
-        <div>
-            <label>目標時間（秒）</label><br>
-            <input type="number" id="single-target" placeholder="輸入秒數" min="1" step="1">
-        </div>
-        <button id="single-btn" onclick="toggleSingleTimer()">開始挑戰</button>
-        <div id="single-status"></div>
-        <div id="single-result"></div>
-        <button onclick="goHome()">回到首頁</button>
+<!-- 雙人模式 -->
+<div id="double-page" class="double-page hidden">
+    <button class="home-btn-double" onclick="goHome()">回首頁</button>
+    <div class="player-area player1-area">
+        <h2><br/>玩家 1</h2>
+        <input type="number" id="p1-target" placeholder="目標秒數" min="1" step="1">
+        <button id="p1-btn" onclick="togglePlayerTimer(1)">開始</button>
+        <div id="p1-status" class="player-status"></div>
+        <div id="p1-result" class="player-result"></div>
     </div>
-
-    <!-- 雙人模式頁面 -->
-    <div id="double-page" class="double-page hidden">
-        <button class="home-btn-double" onclick="goHome()">回首頁</button>
-        
-        <!-- 玩家1區域（上方，180度旋轉） -->
-        <div class="player-area player1-area">
-            <h2><br/>玩家 1</h2>
-            <input type="number" id="p1-target" placeholder="目標秒數" min="1" step="1">
-            <button id="p1-btn" onclick="togglePlayerTimer(1)">開始</button>
-            <div id="p1-status" class="player-status"></div>
-            <div id="p1-result" class="player-result"></div>
-        </div>
-        
-        <!-- 玩家2區域（下方） -->
-        <div class="player-area player2-area">
-            <h2><br/>玩家 2</h2>
-            <input type="number" id="p2-target" placeholder="目標秒數" min="1" step="1">
-            <button id="p2-btn" onclick="togglePlayerTimer(2)">開始</button>
-            <div id="p2-status" class="player-status"></div>
-            <div id="p2-result" class="player-result"></div>
-        </div>
+    <div class="player-area player2-area">
+        <h2><br/>玩家 2</h2>
+        <input type="number" id="p2-target" placeholder="目標秒數" min="1" step="1">
+        <button id="p2-btn" onclick="togglePlayerTimer(2)">開始</button>
+        <div id="p2-status" class="player-status"></div>
+        <div id="p2-result" class="player-result"></div>
     </div>
+</div>
 
-    <script>
-        let mode = '';
-        
-        // 單人模式變數
-        let singleTargetTime = 0;
-        let singleStartTime = 0;
-        let singleRunning = false;
-        
-        // 雙人模式變數
-        let player1 = { target: 0, start: 0, running: false };
-        let player2 = { target: 0, start: 0, running: false };
+<script>
+    let mode = '';
+    let singleTargetTime = 0, singleStartTime = 0, singleRunning = false;
+    let player1 = { target:0, start:0, running:false };
+    let player2 = { target:0, start:0, running:false };
 
-        function selectMode(selectedMode) {
-            mode = selectedMode;
-            document.getElementById('home-page').classList.add('hidden');
-            if (mode === 'single') {
-                document.getElementById('single-page').classList.remove('hidden');
-            } else {
-                document.getElementById('double-page').classList.remove('hidden');
-            }
-        }
+    // 單人最佳紀錄（本次 session）
+    let singleBest = null; // { target, diff }
+    let singleHistory = []; // 最近幾筆
 
-        // 單人模式計時
-        function toggleSingleTimer() {
-            const input = document.getElementById('single-target');
-            const btn = document.getElementById('single-btn');
-            const status = document.getElementById('single-status');
-            const result = document.getElementById('single-result');
-            
-            if (!singleRunning) {
-                if (!input.value || input.value <= 0) {
-                    alert('請輸入有效的目標時間');
-                    return;
-                }
-                
-                singleTargetTime = parseFloat(input.value);
-                input.disabled = true;
-                btn.textContent = '停止';
-                singleRunning = true;
-                singleStartTime = Date.now();
-                status.textContent = '計時中...';
-                result.innerHTML = '';
-                
-            } else {
-                singleRunning = false;
-                const finalTime = (Date.now() - singleStartTime) / 1000;
-                const difference = Math.abs(finalTime - singleTargetTime);
-                const accuracy = Math.max(0, (1 - difference / singleTargetTime) * 100).toFixed(1);
-                
-                status.textContent = '';
-                let resultClass = difference < 0.5 ? 'good' : 'bad';
-                result.innerHTML = `
-                    <div class="${resultClass}">
-                        目標：${singleTargetTime}秒<br>
-                        實際：${finalTime.toFixed(3)}秒<br>
-                        差距：${difference.toFixed(3)}秒<br>
-                        準確度：${accuracy}%
-                    </div>
-                `;
-                
-                btn.textContent = '再試一次';
-                input.disabled = false;
-            }
-        }
+    function selectMode(m) {
+        mode = m;
+        document.getElementById('home-page').classList.add('hidden');
+        document.getElementById(m === 'single' ? 'single-page' : 'double-page').classList.remove('hidden');
+    }
 
-        // 雙人模式計時
-        function togglePlayerTimer(playerNum) {
-            const player = playerNum === 1 ? player1 : player2;
-            const input = document.getElementById(`p${playerNum}-target`);
-            const btn = document.getElementById(`p${playerNum}-btn`);
-            const status = document.getElementById(`p${playerNum}-status`);
-            const result = document.getElementById(`p${playerNum}-result`);
-            
-            if (!player.running) {
-                if (!input.value || input.value <= 0) {
-                    alert(`玩家 ${playerNum} 請輸入有效的目標時間`);
-                    return;
-                }
-                
-                player.target = parseFloat(input.value);
-                input.disabled = true;
-                btn.textContent = '停止';
-                player.running = true;
-                player.start = Date.now();
-                status.classList.remove('hidden-status');
-                status.textContent = '計時中...';
-                result.innerHTML = '';
-                
-            } else {
-                player.running = false;
-                const finalTime = (Date.now() - player.start) / 1000;
-                const difference = Math.abs(finalTime - player.target);
-                const accuracy = Math.max(0, (1 - difference / player.target) * 100).toFixed(1);
-                
-                status.classList.add('hidden-status');
-                status.textContent = '';
-                let resultClass = difference < 0.5 ? 'good' : 'bad';
-                result.innerHTML = `
-                    <div class="${resultClass}">
-                        目標：${player.target}秒<br>
-                        實際：${finalTime.toFixed(3)}秒<br>
-                        差距：${difference.toFixed(3)}秒<br>
-                        準確度：${accuracy}%
-                    </div>
-                `;
-                
-                btn.textContent = '再來';
-                input.disabled = false;
-            }
-        }
-        
-        function goHome() {
-            // 重置所有狀態
+    function toggleSingleTimer() {
+        const input = document.getElementById('single-target');
+        const btn   = document.getElementById('single-btn');
+        const status = document.getElementById('single-status');
+        const result = document.getElementById('single-result');
+        const histEl = document.getElementById('single-history');
+
+        if (!singleRunning) {
+            if (!input.value || input.value <= 0) { alert('請輸入有效的目標時間'); return; }
+            singleTargetTime = parseFloat(input.value);
+            input.disabled = true;
+            btn.textContent = '⏹ 停止';
+            singleRunning = true;
+            singleStartTime = Date.now();
+            status.textContent = '計時中...';
+            result.innerHTML = '';
+        } else {
             singleRunning = false;
-            player1 = { target: 0, start: 0, running: false };
-            player2 = { target: 0, start: 0, running: false };
-            
-            // 清空所有輸入和顯示
-            ['single-target', 'p1-target', 'p2-target'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.value = '';
-                    el.disabled = false;
-                }
-            });
-            
-            ['single-status', 'single-result', 'p1-status', 'p1-result', 'p2-status', 'p2-result'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.innerHTML = '';
-                    el.classList.remove('hidden-status');
-                }
-            });
-            
-            ['single-btn', 'p1-btn', 'p2-btn'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = id === 'single-btn' ? '開始挑戰' : '開始';
-            });
-            
-            // 切換頁面
-            document.getElementById('home-page').classList.remove('hidden');
-            document.getElementById('single-page').classList.add('hidden');
-            document.getElementById('double-page').classList.add('hidden');
-        }
+            const finalTime = (Date.now() - singleStartTime) / 1000;
+            const difference = Math.abs(finalTime - singleTargetTime);
+            const accuracy = Math.max(0, (1 - difference / singleTargetTime) * 100).toFixed(1);
 
-        // 註冊 Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
+            // 最佳紀錄判斷（同目標時間）
+            let isBest = false;
+            if (!singleBest || singleBest.target !== singleTargetTime || difference < singleBest.diff) {
+                singleBest = { target: singleTargetTime, diff: difference };
+                isBest = true;
+            }
+
+            // 加入歷史
+            singleHistory.unshift({ target: singleTargetTime, finalTime, difference, accuracy });
+            if (singleHistory.length > 5) singleHistory.pop();
+
+            status.textContent = '';
+            const cls = difference < 0.5 ? 'good' : 'bad';
+            const badge = isBest ? '<span class="best-badge">🏆 最佳</span>' : '';
+            result.innerHTML = `
+                <div class="result-card ${cls}">
+                    目標：${singleTargetTime} 秒<br>
+                    實際：${finalTime.toFixed(3)} 秒<br>
+                    差距：${difference.toFixed(3)} 秒 ${badge}<br>
+                    準確度：${accuracy}%
+                </div>`;
+
+            // 歷史紀錄顯示（最近幾筆）
+            if (singleHistory.length > 1) {
+                const rows = singleHistory.slice(1).map((h, i) =>
+                    `<span>第 ${i+2} 筆：目標 ${h.target}s，差距 ${h.difference.toFixed(3)}s，${h.accuracy}%</span>`
+                ).join('<br>');
+                histEl.innerHTML = '<br>📋 近期紀錄<br>' + rows;
+            }
+
+            btn.textContent = '🔄 再試一次';
+            input.disabled = false;
         }
-    </script>
+    }
+
+    function togglePlayerTimer(playerNum) {
+        const player = playerNum === 1 ? player1 : player2;
+        const input  = document.getElementById(`p${playerNum}-target`);
+        const btn    = document.getElementById(`p${playerNum}-btn`);
+        const status = document.getElementById(`p${playerNum}-status`);
+        const result = document.getElementById(`p${playerNum}-result`);
+
+        if (!player.running) {
+            if (!input.value || input.value <= 0) { alert(`玩家 ${playerNum} 請輸入有效的目標時間`); return; }
+            player.target = parseFloat(input.value);
+            input.disabled = true;
+            btn.textContent = '⏹ 停止';
+            player.running = true;
+            player.start = Date.now();
+            status.textContent = '計時中...';
+            result.innerHTML = '';
+        } else {
+            player.running = false;
+            const finalTime = (Date.now() - player.start) / 1000;
+            const difference = Math.abs(finalTime - player.target);
+            const accuracy = Math.max(0, (1 - difference / player.target) * 100).toFixed(1);
+
+            status.textContent = '';
+            const cls = difference < 0.5 ? 'good' : 'bad';
+            result.innerHTML = `
+                <div class="result-card ${cls}">
+                    目標：${player.target} 秒<br>
+                    實際：${finalTime.toFixed(3)} 秒<br>
+                    差距：${difference.toFixed(3)} 秒<br>
+                    準確度：${accuracy}%
+                </div>`;
+
+            btn.textContent = '🔄 再來';
+            input.disabled = false;
+
+            // 雙人比較
+            const other = playerNum === 1 ? player2 : player1;
+            const otherResult = document.getElementById(`p${playerNum === 1 ? 2 : 1}-result`);
+            if (!other.running && otherResult.innerHTML.includes('result-card') && player.target === other.target) {
+                const otherText = otherResult.innerHTML;
+                // 雙方都停了，顯示勝負（已有個別結果，不額外複雜化）
+            }
+        }
+    }
+
+    function goHome() {
+        singleRunning = false;
+        player1 = { target:0, start:0, running:false };
+        player2 = { target:0, start:0, running:false };
+        singleHistory = [];
+
+        ['single-target','p1-target','p2-target'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.value = ''; el.disabled = false; }
+        });
+        ['single-status','single-result','single-history','p1-status','p1-result','p2-status','p2-result'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = '';
+        });
+        ['single-btn','p1-btn','p2-btn'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = id === 'single-btn' ? '開始挑戰' : '開始';
+        });
+
+        document.getElementById('home-page').classList.remove('hidden');
+        document.getElementById('single-page').classList.add('hidden');
+        document.getElementById('double-page').classList.add('hidden');
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+    }
+</script>
 </body>
 </html>
-
-
-
-
-
-
